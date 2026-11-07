@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# my tea
 
-## Getting Started
+차 사진을 찍으면 AI가 종류를 찾아 찻장에 정리해 주는 웹앱.
 
-First, run the development server:
+## 실행
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local   # ANTHROPIC_API_KEY 입력
+npm install
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+휴대폰에서 카메라로 시험하려면 같은 와이파이에서 `http://<내 컴퓨터 IP>:3000`으로 접속하세요. (카메라 촬영 버튼은 HTTPS 또는 localhost에서 가장 잘 동작합니다. 배포 후에는 문제 없습니다.)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 구조
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 경로 | 역할 |
+|---|---|
+| `app/page.tsx` | 찻장(홈): 개수, 먼저 마실 차 추천, 종류별 목록 |
+| `app/add/page.tsx` | 사진 촬영/선택 → AI 분석 → 확인·수정 후 저장 |
+| `app/tea/[id]/page.tsx` | 차 상세, 수정(우리는 방법·유통기한·남은 양·메모), 삭제 |
+| `app/settings/page.tsx` | AI 동의 철회, 데이터 내보내기, 전체 삭제 |
+| `app/api/identify/route.ts` | 사진을 Claude(`claude-opus-5-5`)로 분석. 아무것도 저장하지 않음 |
+| `lib/db.ts` | IndexedDB 저장소 (데이터는 기기에만 저장) |
+| `lib/image.ts` | 사진 축소 + 재인코딩(EXIF·GPS 제거) |
+| `lib/operator.ts` | 운영자/사업자 정보 — **출시 전 반드시 채우기** |
 
-## Learn More
+## 출시 전 유의사항 체크리스트
 
-To learn more about Next.js, take a look at the following resources:
+| # | 항목 | 상태 |
+|---|---|---|
+| 1 | 개인정보처리방침 | `/privacy` — 국외 이전(Anthropic, 미국) 고지 포함 |
+| 2 | 이용약관 | `/terms` |
+| 3 | 환불정책 | `/refund` — 현재 무료, 유료화 시 개정 |
+| 4 | 쿠키정책 | `/cookies` — 쿠키 미사용, 브라우저 저장소 항목 공개 |
+| 5 | 쿠키 동의 배너 | 비필수 쿠키가 없어 동의 대신 **안내 배너** 표시. 분석/광고 도구를 추가하면 동의 배너로 바꿔야 함 |
+| 6 | 입력 양식 동의 | 사진 분석 전 필수 동의 체크(기본값 꺼짐), 설정에서 철회 가능 |
+| 7 | 불필요한 개인정보 미수집 | 회원가입 없음, 서버 저장 없음, 사진 EXIF/GPS 제거 |
+| 8 | 외부 SDK 점검 | 서버의 `@anthropic-ai/sdk`만 사용. 분석·광고 SDK, 외부 폰트/CDN 없음 |
+| 9 | 다크패턴 없음 | 동의 없이도 직접 입력으로 모든 기능 사용 가능, 삭제·철회 쉬움 |
+| 10 | 숨겨진 요금 없음 | 무료, 결제 없음 |
+| 11 | 가짜 후기 없음 | 후기·평점 기능 없음 |
+| 12 | 근거 없는 주장 없음 | AI 결과는 "추정"·확신도 표시, 효능·건강 주장 금지(프롬프트+약관) |
+| 13 | 이미지 대체 텍스트 | 사진에 alt, 장식 아이콘은 `aria-hidden` |
+| 14 | 색상 대비 | 작은 회색 글씨 5.3:1, 큰 회색 글씨 3.5:1 (WCAG AA) |
+| 15 | 키보드 이동 | 모든 동작이 버튼/링크, 포커스 표시, 본문 건너뛰기 링크 |
+| 16 | 사업자 정보 | `/about` — **`lib/operator.ts`의 [대괄호] 값을 채워야 함** |
+| 17 | 아동 정보 | 식별 정보 미수집, 방침에 명시 |
+| 18 | 이메일 수신거부 | 이메일 발송 기능 없음 (도입 시 수신거부 링크 필수) |
+| 19 | 이미지·글꼴 이용권 | 시스템 폰트, 직접 그린 SVG 아이콘만 사용 |
+| 20 | 개인정보 삭제 기능 | 설정 → 모든 데이터 삭제 / 차별 삭제 / 내보내기 |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+정책 문서는 초안입니다. 정식 출시나 유료화 전에는 전문가 검토를 받는 것을 권장합니다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 배포 메모
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `ANTHROPIC_API_KEY`는 서버 환경변수로만 설정하세요(브라우저에 노출되지 않음).
+- `/api/identify`에는 IP당 10분 20회 제한이 있습니다. 서버리스 환경에서는 인스턴스마다 따로 세므로, 공개 운영 시 Upstash 같은 공용 저장소 기반 제한으로 바꾸는 것을 권장합니다.
