@@ -470,24 +470,6 @@ textarea.input {
   font-weight: 600;
 }
 
-.spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid var(--line);
-  border-top-color: var(--fg);
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation-duration: 3s;
-  }
-}
 
 /* ---------- add flow ---------- */
 
@@ -538,4 +520,55 @@ textarea.input {
 .tile-remove:focus-visible {
   outline-color: #fff;
   outline-offset: -4px;
+}
+
+/* ---------- loading ---------- */
+
+.leaf-loader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 24px;
+}
+.leaf-loader svg {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  fill: var(--fg);
+  animation: leaf-turn 1.8s cubic-bezier(0.6, 0.1, 0.4, 0.9) infinite;
+}
+.leaf-loader .leaf {
+  animation: leaf-breathe 1.8s ease-in-out infinite;
+}
+.leaf-loader .leaf:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.leaf-loader .leaf:nth-child(3) {
+  animation-delay: 0.6s;
+}
+.leaf-loader .leaf-vein {
+  fill: none;
+  stroke: var(--bg);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+@keyframes leaf-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes leaf-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .leaf-loader svg,
+  .leaf-loader .leaf {
+    animation-duration: 6s;
+  }
 }

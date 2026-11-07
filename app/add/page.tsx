@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { LeafLoader } from "@/components/LeafLoader";
 import { PhotoThumb, usePhotoUrl } from "@/components/PhotoThumb";
 import { TeaForm } from "@/components/TeaForm";
 import { addTea, listTeas } from "@/lib/db";
@@ -19,7 +20,7 @@ import {
   type TeaDraft,
 } from "@/lib/types";
 
-type Status = "idle" | "collect" | "analyzing" | "duplicate" | "review" | "error";
+type Status = "idle" | "preparing" | "collect" | "analyzing" | "duplicate" | "review" | "error";
 
 interface Photo {
   analysis: AnalysisImage;
@@ -125,6 +126,8 @@ export default function AddTea() {
     const files = Array.from(e.target.files ?? []).slice(0, remaining);
     e.target.value = "";
     if (files.length === 0) return;
+    // Shrinking full-size phone photos takes a moment; show it instead of a frozen screen.
+    setStatus("preparing");
     try {
       const prepared = await Promise.all(files.map(prepareImage));
       setPhotos((prev) => [...prev, ...prepared].slice(0, MAX_PHOTOS));
@@ -235,7 +238,7 @@ export default function AddTea() {
             </label>
           )}
 
-          {pickButtons("사진 찍기")}
+          {pickButtons("사진 추가하기")}
           <button type="button" className="btn-text" onClick={enterManually}>
             사진 없이 직접 입력하기
           </button>
@@ -278,7 +281,7 @@ export default function AddTea() {
               {remaining > 0 && (
                 <div className="grid-2">
                   <button type="button" className="btn" onClick={() => cameraRef.current?.click()}>
-                    + 사진 찍기
+                    + 사진 추가하기
                   </button>
                   <button type="button" className="btn" onClick={() => albumRef.current?.click()}>
                     + 앨범
@@ -292,11 +295,10 @@ export default function AddTea() {
           )}
 
           {status === "analyzing" && (
-            <div style={{ display: "flex", gap: 14, alignItems: "center", marginTop: 24 }}>
-              <div className="spinner" aria-hidden="true" />
-              <p className="sub">어떤 차인지 살펴보는 중…</p>
-            </div>
+            <LeafLoader label="어떤 차인지 살펴보는 중…" />
           )}
+
+          {status === "preparing" && <LeafLoader label="사진 준비 중…" />}
 
           {status === "error" && (
             <div className="stack" style={{ marginTop: 24 }}>

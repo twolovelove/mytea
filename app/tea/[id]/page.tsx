@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LeafLoader } from "@/components/LeafLoader";
 import { usePhotoUrl } from "@/components/PhotoThumb";
 
 function Photo({ blob, alt }: { blob: Blob; alt: string }) {
@@ -42,7 +43,13 @@ export default function TeaDetail() {
       .catch(() => setTea(null));
   }, [id]);
 
-  if (tea === undefined) return <main id="main" className="page" />;
+  if (tea === undefined) {
+    return (
+      <main id="main" className="page">
+        <LeafLoader label="불러오는 중…" delay={300} />
+      </main>
+    );
+  }
 
   if (tea === null) {
     return (

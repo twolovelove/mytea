@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { PhotoThumb } from "@/components/PhotoThumb";
 import { LeafIcon } from "@/components/icons";
+import { LeafLoader } from "@/components/LeafLoader";
 import { listTeas } from "@/lib/db";
 import {
   CATEGORY_IDS,
@@ -69,6 +70,8 @@ export default function Home() {
           <span style={{ fontWeight: 700 }}>my tea</span>
           <Link href="/settings">설정</Link>
         </div>
+
+        {!teas && <LeafLoader label="찻장 불러오는 중…" delay={300} />}
 
         {teas && (
           <>
