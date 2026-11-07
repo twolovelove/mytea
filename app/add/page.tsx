@@ -133,7 +133,7 @@ export default function AddTea() {
       setPhotos((prev) => [...prev, ...prepared].slice(0, MAX_PHOTOS));
       setStatus("collect");
     } catch {
-      setErrorMessage("사진을 불러오지 못했어요. 다른 사진으로 해 주세요.");
+      setErrorMessage("사진을 불러오지 못했어요. 다른 사진으로 다시 시도해 주세요.");
       setStatus("error");
     }
   }
@@ -335,7 +335,7 @@ export default function AddTea() {
                 ))}
               </ul>
               <p className="hint" style={{ marginTop: 12 }}>
-                같은 차라면 눌러서 남은 양이나 유통기한을 고칠 수 있어요.
+                같은 차라면 눌러서 남은 양이나 유통기한을 수정해 주세요.
               </p>
               <div className="stack" style={{ marginTop: 20 }}>
                 <button type="button" className="btn btn-block" onClick={addAsNew}>

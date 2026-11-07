@@ -34,6 +34,10 @@ export default function Cookies() {
             <td>localStorage &lsquo;mytea.noticeSeen&rsquo;</td>
             <td>저장 방식 안내를 확인했는지 여부.</td>
           </tr>
+          <tr>
+            <td>localStorage &lsquo;mytea.installCardClosed&rsquo;</td>
+            <td>홈 화면 추가 안내 카드를 닫았는지 여부.</td>
+          </tr>
         </tbody>
       </table>
 

@@ -116,14 +116,14 @@ export default function TeaDetail() {
             {brew.tempC}
             <sup aria-hidden="true">°C</sup>
           </p>
-          <p className="sub">{brewDetails.length ? brewDetails.join(" · ") : "우리는 시간을 추가해 보세요"}</p>
+          <p className="sub">{brewDetails.length ? brewDetails.join(" · ") : "우리는 시간을 추가해 주세요"}</p>
         </>
       ) : (
         <section className="block">
           <p className="label">우리는 방법</p>
           <p className="headline">
-            {brewDetails.length ? brewDetails.join(" · ") : "아직 몰라요"}{" "}
-            {!brewDetails.length && <span className="soft">수정에서 추가할 수 있어요</span>}
+            {brewDetails.length ? brewDetails.join(" · ") : "아직 정보가 없어요"}{" "}
+            {!brewDetails.length && <span className="soft">오른쪽 위 수정에서 추가해 주세요</span>}
           </p>
         </section>
       )}
@@ -136,7 +136,7 @@ export default function TeaDetail() {
               {expiry.strong} <span className="soft">{expiry.soft}</span>
             </>
           ) : (
-            <span className="soft">입력하지 않았어요</span>
+            <span className="soft">아직 입력된 정보가 없어요</span>
           )}
         </p>
       </section>
@@ -147,7 +147,7 @@ export default function TeaDetail() {
           {tea.amount.value !== null ? (
             `${tea.amount.value}${UNIT_LABELS[tea.amount.unit]}`
           ) : (
-            <span className="soft">입력하지 않았어요</span>
+            <span className="soft">아직 입력된 정보가 없어요</span>
           )}
         </p>
       </section>

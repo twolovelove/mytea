@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { deleteAllTeas, listTeas } from "@/lib/db";
-import { blobToDataUrl } from "@/lib/image";
+import { buildExportZip, downloadBlob } from "@/lib/export";
 import { clearPrefs, getPref, setPref } from "@/lib/prefs";
 
 export default function Settings() {
@@ -21,20 +21,14 @@ export default function Settings() {
   }
 
   async function exportData() {
-    const teas = await listTeas();
-    const data = await Promise.all(
-      teas.map(async (t) => ({ ...t, photos: await Promise.all(t.photos.map(blobToDataUrl)) })),
-    );
-    const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), teas: data }, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `my-tea-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setMessage(`차 ${teas.length}개를 파일로 내보냈어요.`);
+    try {
+      const teas = await listTeas();
+      const zip = await buildExportZip(teas);
+      downloadBlob(zip, `my-tea-${new Date().toISOString().slice(0, 10)}.zip`);
+      setMessage(`차 ${teas.length}개를 ZIP 파일로 내보냈어요.`);
+    } catch {
+      setMessage("내보내기에 실패했어요. 다시 시도해 주세요.");
+    }
   }
 
   async function deleteEverything() {
@@ -58,6 +52,13 @@ export default function Settings() {
 
       <ul className="settings-list">
         <li>
+          <h2>홈 화면에 추가하기</h2>
+          <p className="hint">앱처럼 아이콘으로 열 수 있어요. 기록은 연 곳마다 따로 저장되니 늘 같은 아이콘으로 열어 주세요.</p>
+          <Link href="/install" className="btn-text" style={{ display: "inline-block" }}>
+            방법 보기
+          </Link>
+        </li>
+        <li>
           <h2>AI 사진 분석 동의</h2>
           <p className="hint">
             {consentedAt
@@ -72,7 +73,7 @@ export default function Settings() {
         </li>
         <li>
           <h2>내 데이터 내보내기</h2>
-          <p className="hint">저장된 차 기록과 사진을 JSON 파일로 받아요.</p>
+          <p className="hint">차 목록 표(CSV)와 사진을 ZIP 파일로 받으실 수 있어요. 표는 엑셀이나 구글 시트에서 열어 주세요.</p>
           <button type="button" className="btn-text" onClick={exportData}>
             파일로 내보내기
           </button>

@@ -20,6 +20,7 @@ interface FormState {
   form: FormId;
   tempC: string;
   timeMin: string;
+  timeSec: string;
   grams: string;
   waterMl: string;
   expiry: string;
@@ -43,7 +44,8 @@ function toForm(d: TeaDraft): FormState {
     category: d.category,
     form: d.form,
     tempC: str(d.brew.tempC),
-    timeMin: d.brew.timeSec === null ? "" : String(d.brew.timeSec / 60),
+    timeMin: d.brew.timeSec === null ? "" : String(Math.floor(Math.round(d.brew.timeSec) / 60)),
+    timeSec: d.brew.timeSec === null ? "" : String(Math.round(d.brew.timeSec) % 60),
     grams: str(d.brew.grams),
     waterMl: str(d.brew.waterMl),
     expiry: d.expiry ?? "",
@@ -55,6 +57,8 @@ function toForm(d: TeaDraft): FormState {
 
 function fromForm(f: FormState, photos: Blob[]): TeaDraft {
   const minutes = num(f.timeMin);
+  const seconds = num(f.timeSec);
+  const totalSec = minutes === null && seconds === null ? null : Math.round((minutes ?? 0) * 60 + (seconds ?? 0));
   return {
     name: f.name.trim(),
     brand: f.brand.trim(),
@@ -62,7 +66,7 @@ function fromForm(f: FormState, photos: Blob[]): TeaDraft {
     form: f.form,
     brew: {
       tempC: num(f.tempC),
-      timeSec: minutes === null ? null : Math.round(minutes * 60),
+      timeSec: totalSec,
       grams: num(f.grams),
       waterMl: num(f.waterMl),
     },
@@ -163,10 +167,19 @@ export function TeaForm({
             <span>물 온도 (°C)</span>
             <input className="input" type="number" inputMode="numeric" min={0} max={100} value={f.tempC} onChange={(e) => set("tempC", e.target.value)} />
           </label>
-          <label className="field">
-            <span>시간 (분)</span>
-            <input className="input" type="number" inputMode="decimal" min={0} step={0.5} value={f.timeMin} onChange={(e) => set("timeMin", e.target.value)} />
-          </label>
+          <div className="field" role="group" aria-labelledby="brew-time-label">
+            <span id="brew-time-label">시간</span>
+            <div className="time-inputs">
+              <label>
+                <input className="input" type="number" inputMode="numeric" min={0} step={1} value={f.timeMin} onChange={(e) => set("timeMin", e.target.value)} aria-label="분" />
+                <span aria-hidden="true">분</span>
+              </label>
+              <label>
+                <input className="input" type="number" inputMode="numeric" min={0} max={59} step={5} value={f.timeSec} onChange={(e) => set("timeSec", e.target.value)} aria-label="초" />
+                <span aria-hidden="true">초</span>
+              </label>
+            </div>
+          </div>
           <label className="field">
             <span>찻잎 (g)</span>
             <input className="input" type="number" inputMode="decimal" min={0} step={0.5} value={f.grams} onChange={(e) => set("grams", e.target.value)} />

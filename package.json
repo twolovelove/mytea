@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
+    "fflate": "^0.8.2",
     "idb": "^8.0.4",
     "next": "15.5.29",
     "react": "19.1.0",

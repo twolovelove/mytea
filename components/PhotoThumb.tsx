@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CupIcon } from "./icons";
+import { TeapotIcon } from "./icons";
 
 export function usePhotoUrl(photo: Blob | null): string | null {
   const [url, setUrl] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export function PhotoThumb({ photo, alt }: { photo: Blob | null; alt: string }) 
   if (!url) {
     return (
       <span className="thumb thumb-empty" aria-hidden="true">
-        <CupIcon />
+        <TeapotIcon />
       </span>
     );
   }

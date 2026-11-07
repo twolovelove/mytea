@@ -108,8 +108,11 @@ export function daysUntil(date: string): number {
 }
 
 export function formatMinutes(sec: number): string {
-  const min = sec / 60;
-  return Number.isInteger(min) ? `${min}분` : `${Math.floor(min)}분 ${sec % 60}초`;
+  const total = Math.round(sec);
+  const min = Math.floor(total / 60);
+  const rest = total % 60;
+  if (min === 0) return `${rest}초`;
+  return rest === 0 ? `${min}분` : `${min}분 ${rest}초`;
 }
 
 export function expiryChip(expiry: string | null): string | null {

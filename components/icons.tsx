@@ -9,12 +9,16 @@ export function LeafIcon() {
   );
 }
 
-export function CupIcon() {
+/** A Yixing (자사호) teapot, matching the app icon. */
+export function TeapotIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
-      <path d="M4 10h12v3a6 6 0 0 1-12 0v-3Z" />
-      <path d="M16 11.5h1.5a2.5 2.5 0 0 1 0 5H15" />
-      <path d="M8 3.5c-1 1.2 1 2 0 3.5M12 3.5c-1 1.2 1 2 0 3.5" strokeLinecap="round" />
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="5.4" r="0.9" />
+      <path d="M9.4 8.4c.6-1.1 1.5-1.7 2.6-1.7s2 .6 2.6 1.7" />
+      <ellipse cx="12" cy="13.6" rx="5.8" ry="4.6" />
+      <path d="M6.6 11.8C5.2 11.4 4 10.6 3.2 9.4c.4 2.3 1.6 4.6 3.6 5.8" />
+      <path d="M17.8 11.8c2.2-.4 3.2.9 3 2.2-.2 1.2-1.4 1.9-3.3 1.6" />
+      <path d="M10 19.6h4" />
     </svg>
   );
 }

@@ -1,47 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PhotoThumb } from "@/components/PhotoThumb";
 import { LeafIcon } from "@/components/icons";
+import { InstallCard } from "@/components/InstallCard";
 import { LeafLoader } from "@/components/LeafLoader";
 import { listTeas } from "@/lib/db";
+import { pickToday } from "@/lib/today";
 import {
   CATEGORY_IDS,
   CATEGORY_LABELS,
   FORM_LABELS,
   UNIT_LABELS,
-  daysUntil,
   expiryChip,
-  formatMinutes,
   type CategoryId,
   type Tea,
 } from "@/lib/types";
 
-interface Pick {
-  label: string;
-  strong: string;
-  soft: string;
-}
-
-// The headline under the count: nudge toward whatever expires soonest,
-// otherwise rotate a "tea of the day".
-function pickToday(teas: Tea[]): Pick | null {
-  if (teas.length === 0) return null;
-  const expiring = teas
-    .filter((t) => t.expiry && daysUntil(t.expiry) <= 30)
-    .sort((a, b) => daysUntil(a.expiry!) - daysUntil(b.expiry!));
-  const first = expiring[0];
-  if (first) {
-    const d = daysUntil(first.expiry!);
-    if (d < 0) return { label: "확인해 보세요", strong: first.name, soft: "유통기한이 지났어요" };
-    return { label: "먼저 마시면 좋아요", strong: first.name, soft: d === 0 ? "유통기한이 오늘까지예요" : `유통기한이 ${d}일 남았어요` };
-  }
-  const day = Math.floor(Date.now() / 86_400_000);
-  const tea = teas[day % teas.length];
-  const parts = [tea.brew.tempC !== null ? `${tea.brew.tempC}°` : null, tea.brew.timeSec !== null ? formatMinutes(tea.brew.timeSec) : null].filter(Boolean);
-  return { label: "오늘의 차", strong: tea.name, soft: parts.length ? parts.join(" · ") : CATEGORY_LABELS[tea.category] };
-}
+const PAGE_SIZE = 10;
 
 function meta(t: Tea): string {
   const parts = [CATEGORY_LABELS[t.category], FORM_LABELS[t.form]];
@@ -52,6 +29,8 @@ function meta(t: Tea): string {
 export default function Home() {
   const [teas, setTeas] = useState<Tea[] | null>(null);
   const [filter, setFilter] = useState<CategoryId | "all">("all");
+  const [page, setPage] = useState(1);
+  const listRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     listTeas()
@@ -61,7 +40,20 @@ export default function Home() {
 
   const present = useMemo(() => CATEGORY_IDS.filter((id) => teas?.some((t) => t.category === id)), [teas]);
   const pick = useMemo(() => (teas ? pickToday(teas) : null), [teas]);
-  const shown = (teas ?? []).filter((t) => filter === "all" || t.category === filter);
+  const filtered = (teas ?? []).filter((t) => filter === "all" || t.category === filter);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const shown = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  function goTo(next: number) {
+    setPage(next);
+    listRef.current?.scrollIntoView({ block: "start" });
+  }
+
+  function changeFilter(next: CategoryId | "all") {
+    setFilter(next);
+    setPage(1);
+  }
 
   return (
     <>
@@ -87,25 +79,30 @@ export default function Home() {
                 <p className="headline">
                   {pick.strong} <span className="soft">{pick.soft}</span>
                 </p>
+                <p className="hint" style={{ marginTop: 10 }}>
+                  {pick.reason}
+                </p>
               </section>
             ) : (
               <section className="block">
                 <p className="label">시작하기</p>
                 <p className="headline">
-                  차 사진을 찍어 보세요 <span className="soft">종류는 알아서 찾아 정리해 둘게요</span>
+                  차 사진을 추가해 주세요 <span className="soft">어떤 차인지 제가 찾아서 정리해 드릴게요</span>
                 </p>
               </section>
             )}
 
+            <InstallCard />
+
             {teas.length > 0 && (
-              <section className="block" aria-label="차 목록">
+              <section ref={listRef} className="block list-section" aria-label="차 목록">
                 {present.length > 1 && (
                   <div className="tabs" role="group" aria-label="종류별로 보기">
-                    <button type="button" className="tab" aria-pressed={filter === "all"} onClick={() => setFilter("all")}>
+                    <button type="button" className="tab" aria-pressed={filter === "all"} onClick={() => changeFilter("all")}>
                       전체
                     </button>
                     {present.map((id) => (
-                      <button key={id} type="button" className="tab" aria-pressed={filter === id} onClick={() => setFilter(id)}>
+                      <button key={id} type="button" className="tab" aria-pressed={filter === id} onClick={() => changeFilter(id)}>
                         {CATEGORY_LABELS[id]}
                       </button>
                     ))}
@@ -128,6 +125,19 @@ export default function Home() {
                     );
                   })}
                 </ul>
+                {pageCount > 1 && (
+                  <nav className="pager" aria-label="목록 페이지">
+                    <button type="button" className="btn-text" disabled={currentPage === 1} onClick={() => goTo(currentPage - 1)}>
+                      ← 이전
+                    </button>
+                    <span aria-current="page">
+                      {currentPage} / {pageCount}
+                    </span>
+                    <button type="button" className="btn-text" disabled={currentPage === pageCount} onClick={() => goTo(currentPage + 1)}>
+                      다음 →
+                    </button>
+                  </nav>
+                )}
               </section>
             )}
           </>

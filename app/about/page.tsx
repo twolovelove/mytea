@@ -28,7 +28,7 @@ export default function About() {
       </table>
       <h2>사용한 오픈소스와 리소스</h2>
       <p>
-        글꼴은 기기에 설치된 시스템 글꼴을 사용하고, 아이콘은 직접 그렸습니다. 서비스 코드에 사용한 오픈소스(Next.js, React, idb, Zod,
+        글꼴은 기기에 설치된 시스템 글꼴을 사용하고, 아이콘은 직접 그렸습니다. 서비스 코드에 사용한 오픈소스(Next.js, React, idb, Zod, fflate,
         Anthropic SDK)는 MIT 또는 Apache 2.0 라이선스를 따릅니다.
       </p>
     </LegalPage>

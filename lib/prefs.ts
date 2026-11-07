@@ -4,6 +4,7 @@
 const KEYS = {
   aiConsent: "mytea.aiConsent",
   noticeSeen: "mytea.noticeSeen",
+  installCardClosed: "mytea.installCardClosed",
 } as const;
 
 type Key = keyof typeof KEYS;
