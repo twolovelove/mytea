@@ -54,15 +54,17 @@ export interface Tea {
   expiry: string | null;
   amount: { value: number | null; unit: AmountUnit };
   notes: string;
-  /** Re-encoded thumbnail; EXIF (incl. GPS) is stripped. */
-  photo: Blob | null;
+  /** Re-encoded thumbnails, first one is the cover; EXIF (incl. GPS) is stripped. */
+  photos: Blob[];
   createdAt: number;
   updatedAt: number;
 }
 
+export const MAX_PHOTOS = 4;
+
 export type TeaDraft = Omit<Tea, "id" | "createdAt" | "updatedAt">;
 
-export function emptyDraft(photo: Blob | null = null): TeaDraft {
+export function emptyDraft(photos: Blob[] = []): TeaDraft {
   return {
     name: "",
     brand: "",
@@ -72,8 +74,28 @@ export function emptyDraft(photo: Blob | null = null): TeaDraft {
     expiry: null,
     amount: { value: null, unit: "g" },
     notes: "",
-    photo,
+    photos,
   };
+}
+
+function normalizeName(s: string): string {
+  return s.toLowerCase().replace(/[\s\p{P}\p{S}]/gu, "");
+}
+
+/** Teas already in the cabinet that look like the same product. */
+export function findSimilar(teas: Tea[], name: string, brand: string): Tea[] {
+  const n = normalizeName(name);
+  const b = normalizeName(brand);
+  if (n.length < 2) return [];
+  return teas
+    .filter((t) => {
+      const tn = normalizeName(t.name);
+      const tb = normalizeName(t.brand);
+      const nameMatch = tn === n || (Math.min(tn.length, n.length) >= 3 && (tn.includes(n) || n.includes(tn)));
+      const brandConflict = b !== "" && tb !== "" && b !== tb;
+      return nameMatch && !brandConflict;
+    })
+    .slice(0, 3);
 }
 
 /** Whole days from today until `date` (negative once past). */

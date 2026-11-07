@@ -2,8 +2,16 @@ import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 import type { Tea, TeaDraft } from "./types";
 
 // Everything lives in this browser's IndexedDB; nothing is stored on a server.
+// Records saved before multi-photo support carry a single `photo` instead of `photos`.
+type StoredTea = Omit<Tea, "photos"> & { photos?: Blob[]; photo?: Blob | null };
+
 interface TeaDB extends DBSchema {
-  teas: { key: string; value: Tea };
+  teas: { key: string; value: StoredTea };
+}
+
+function normalize(stored: StoredTea): Tea {
+  const { photo, photos, ...rest } = stored;
+  return { ...rest, photos: photos ?? (photo ? [photo] : []) };
 }
 
 let dbPromise: Promise<IDBPDatabase<TeaDB>> | null = null;
@@ -19,11 +27,12 @@ function db() {
 
 export async function listTeas(): Promise<Tea[]> {
   const all = await (await db()).getAll("teas");
-  return all.sort((a, b) => b.createdAt - a.createdAt);
+  return all.map(normalize).sort((a, b) => b.createdAt - a.createdAt);
 }
 
 export async function getTea(id: string): Promise<Tea | undefined> {
-  return (await db()).get("teas", id);
+  const stored = await (await db()).get("teas", id);
+  return stored && normalize(stored);
 }
 
 // crypto.randomUUID only exists on HTTPS/localhost; plain-HTTP LAN testing needs the fallback.

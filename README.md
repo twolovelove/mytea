@@ -5,7 +5,7 @@
 ## 실행
 
 ```bash
-cp .env.example .env.local   # ANTHROPIC_API_KEY 입력
+echo "ANTHROPIC_API_KEY=여기에_키" > .env.local
 npm install
 npm run dev                  # http://localhost:3000
 ```

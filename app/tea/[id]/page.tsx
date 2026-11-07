@@ -4,6 +4,12 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { usePhotoUrl } from "@/components/PhotoThumb";
+
+function Photo({ blob, alt }: { blob: Blob; alt: string }) {
+  const url = usePhotoUrl(blob);
+  // eslint-disable-next-line @next/next/no-img-element -- local blob URL
+  return url ? <img className="photo" src={url} alt={alt} /> : null;
+}
 import { TeaForm } from "@/components/TeaForm";
 import { deleteTea, getTea, updateTea } from "@/lib/db";
 import {
@@ -29,7 +35,6 @@ export default function TeaDetail() {
   const router = useRouter();
   const [tea, setTea] = useState<Tea | null | undefined>(undefined);
   const [editing, setEditing] = useState(false);
-  const photoUrl = usePhotoUrl(tea?.photo ?? null);
 
   useEffect(() => {
     getTea(id)
@@ -149,10 +154,11 @@ export default function TeaDetail() {
         </section>
       )}
 
-      {photoUrl && (
-        <section className="block">
-          {/* eslint-disable-next-line @next/next/no-img-element -- local blob URL */}
-          <img className="photo" src={photoUrl} alt={`${tea.name} 사진`} />
+      {tea.photos.length > 0 && (
+        <section className="block stack" aria-label="사진">
+          {tea.photos.map((blob, i) => (
+            <Photo key={i} blob={blob} alt={`${tea.name} 사진 ${i + 1}`} />
+          ))}
         </section>
       )}
 

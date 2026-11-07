@@ -114,7 +114,7 @@ export default function Home() {
                     return (
                       <li key={t.id}>
                         <Link className="row" href={`/tea/${t.id}`}>
-                          <PhotoThumb photo={t.photo} alt="" />
+                          <PhotoThumb photo={t.photos[0] ?? null} alt="" />
                           <span className="row-text">
                             <span className="row-name">{t.name}</span>
                             <span className="row-meta">{meta(t)}</span>
@@ -130,13 +130,6 @@ export default function Home() {
           </>
         )}
 
-        <nav className="footer-links" aria-label="정책 및 운영 정보">
-          <Link href="/privacy">개인정보처리방침</Link>
-          <Link href="/terms">이용약관</Link>
-          <Link href="/refund">환불정책</Link>
-          <Link href="/cookies">쿠키정책</Link>
-          <Link href="/about">운영자 정보</Link>
-        </nav>
       </main>
 
       <div className="bottom-bar">

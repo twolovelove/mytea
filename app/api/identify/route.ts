@@ -5,9 +5,10 @@ import { IdentifyResult } from "@/lib/identify-schema";
 export const runtime = "nodejs";
 
 const MAX_BASE64_LENGTH = 5_000_000;
+const MAX_IMAGES = 4;
 
-// The photo is analysed and discarded; this route stores nothing.
-const SYSTEM_PROMPT = `You identify tea products from a photo for a personal tea-cabinet app. The photo may show a package, tin, tea bag or loose leaves.
+// Photos are analysed and discarded; this route stores nothing.
+const SYSTEM_PROMPT = `You identify tea products from photos for a personal tea-cabinet app. You get one to four photos, all of the same tea from different angles: a package or tin front, its back label, tea bags or loose leaves. Combine what every photo shows.
 
 Write display text (name, note) in Korean. Keep brand names as printed on the package.
 
@@ -44,17 +45,25 @@ export async function POST(req: Request) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "local";
   if (!allow(ip)) return error("잠시 후 다시 시도해 주세요.", 429);
 
-  let body: { data?: unknown; mediaType?: unknown };
+  let body: { images?: unknown };
   try {
     body = await req.json();
   } catch {
     return error("잘못된 요청이에요.", 400);
   }
-  const { data, mediaType } = body;
-  if (mediaType !== "image/jpeg" || typeof data !== "string" || data.length === 0) {
+  const { images } = body;
+  if (!Array.isArray(images) || images.length === 0 || images.length > MAX_IMAGES) {
     return error("잘못된 요청이에요.", 400);
   }
-  if (data.length > MAX_BASE64_LENGTH) return error("사진이 너무 커요.", 413);
+  const photos: string[] = [];
+  for (const image of images) {
+    const { data, mediaType } = (image ?? {}) as { data?: unknown; mediaType?: unknown };
+    if (mediaType !== "image/jpeg" || typeof data !== "string" || data.length === 0) {
+      return error("잘못된 요청이에요.", 400);
+    }
+    if (data.length > MAX_BASE64_LENGTH) return error("사진이 너무 커요.", 413);
+    photos.push(data);
+  }
 
   try {
     const client = new Anthropic();
@@ -69,7 +78,10 @@ export async function POST(req: Request) {
         {
           role: "user",
           content: [
-            { type: "image", source: { type: "base64", media_type: "image/jpeg", data } },
+            ...photos.map((data) => ({
+              type: "image" as const,
+              source: { type: "base64" as const, media_type: "image/jpeg" as const, data },
+            })),
             { type: "text", text: "이 사진 속 차를 식별해 주세요." },
           ],
         },

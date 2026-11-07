@@ -53,7 +53,7 @@ function toForm(d: TeaDraft): FormState {
   };
 }
 
-function fromForm(f: FormState, photo: Blob | null): TeaDraft {
+function fromForm(f: FormState, photos: Blob[]): TeaDraft {
   const minutes = num(f.timeMin);
   return {
     name: f.name.trim(),
@@ -69,7 +69,7 @@ function fromForm(f: FormState, photo: Blob | null): TeaDraft {
     expiry: f.expiry || null,
     amount: { value: num(f.amountValue), unit: f.amountUnit },
     notes: f.notes.trim(),
-    photo,
+    photos,
   };
 }
 
@@ -99,7 +99,7 @@ export function TeaForm({
     }
     setSaving(true);
     try {
-      await onSubmit(fromForm(f, initial.photo));
+      await onSubmit(fromForm(f, initial.photos));
     } finally {
       setSaving(false);
     }

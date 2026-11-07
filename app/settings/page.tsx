@@ -23,7 +23,7 @@ export default function Settings() {
   async function exportData() {
     const teas = await listTeas();
     const data = await Promise.all(
-      teas.map(async (t) => ({ ...t, photo: t.photo ? await blobToDataUrl(t.photo) : null })),
+      teas.map(async (t) => ({ ...t, photos: await Promise.all(t.photos.map(blobToDataUrl)) })),
     );
     const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), teas: data }, null, 2)], {
       type: "application/json",
